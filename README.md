@@ -1,9 +1,15 @@
 # GR00T Dreams
-GR00T Dreams is a reserach agenda from the Nvidia GEAR Lab to solve the data scarcity problem in robotics through video world models.
+GR00T Dreams is a research agenda from the Nvidia GEAR Lab to solve the robotics data problems through world models.
 
-As a first step, we release DreamGen: Unlocking Genearlization in Robot Learning through Neural Trajectories. (Blog, Arxiv, Demo)
+As a first step, we release <b>DreamGen: Unlocking Generalization in Robot Learning through Neural Trajectories.</b> <a href="https://research.nvidia.com/labs/gear/dreamgen/"><strong>Website</strong></a> | <a href="https://arxiv.org/abs/2505.12705"><strong>Paper</strong></a>
 
-We provide the full pipeline for DreamGen, as Cosmos-Predict2 as the video world model in the repository. This repository is divided into (1) Finetuning video world models, (2) Generating synthetic videos, (3) Extracing IDM actions, (4) Fine-tuning on GR00T N1, and (5) Replicating the DreamGenBench numbers
+
+We provide the full pipeline for DreamGen, as Cosmos-Predict2 as the video world model in the repository. This repository is divided into:
+1. [Finetuning video world models](#1-fine-tuning-video-world-models)
+2. [Generating synthetic videos](#2-generating-synthetic-robot-videos-using-fine-tuned-video-world-models)
+3. [Extracting IDM actions](#3-extracting-robot-actions-using-a-fine-tuned-idm-model-to-lerobot-format)
+4. [Fine-tuning on GR00T N1](#4-fine-tuning-on-gr00t-n1)
+5. [Replicating the DreamGenBench numbers](#5-dreamgen-bench)
 
 Install the environment for `cosmos-predict2` following [cosmos-predict2-setup](https://github.com/nvidia-cosmos/cosmos-predict2/blob/main/documentations/post-training_video2world_gr00t.md#prerequisites).
 
@@ -53,7 +59,7 @@ Scripts are below `IDM_dump/scripts/preprocess` folder. Replace the `source_dir`
 - `robocasa`: RoboCasa (Simulation)
 
 
-### (Optional)3.3 Training Custom IDM model
+### (Optional) 3.3 Training Custom IDM model
 **NOTE: This is only needed if the target embodiment is different from the 4 embodiments that we provide (franka, gr1, so100, and robocasa).**
 
 #### Training IDM model within the `DreamGen` environment
@@ -83,7 +89,6 @@ Run the command within the `DreamGen` environment.
 ## 5. DreamGen Bench
 
 We provide the code to evaluate Instruction Following (IF) and Physics Alignment (PA) from the DreamGen paper.
-TODO for JOEL: ADD PATH TO initial frames and provide links to download all our generated videos.
 
 ### Environment
 
