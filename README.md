@@ -113,13 +113,13 @@ make sure that your directory of video & name of videos is structured as:
 video_dir={YOUR_VIDEO_DIR} # structured as mentioned above
 csv_path={PATH_TO_SAVE}
 device="cuda:0"
-python -m worldbench.eval_sr_qwen_whole \
+python -m dreamgenbench.eval_sr_qwen_whole \
     --video_dir "$video_dir" \
     --output_csv "$csv_path" \
     --device "$device"
 
 # if you are a zero-shot model, you can specify zeroshot as the flag
-python -m worldbench.eval_sr_qwen_whole \
+python -m dreamgenbench.eval_sr_qwen_whole \
     --video_dir "$video_dir" \
     --output_csv "$csv_path" \
     --device "$device" \
@@ -130,20 +130,20 @@ video_dir={YOUR_VIDEO_DIR} # structured as mentioned above
 csv_path={PATH_TO_SAVE}
 api_key={YOUR_OPENAI_API_KEY}
 device="cuda:0"
-python -m worldbench.eval_sr_gpt4o_whole \
+python -m dreamgenbench.eval_sr_gpt4o_whole \
     --video_dir "$video_dir" \
     --output_csv "$csv_path" \
     --api_key "$api_key"
 
 # if you are a zero-shot model, you can specify zeroshot as the flag
-python -m worldbench.eval_sr_gpt4o_whole \
+python -m dreamgenbench.eval_sr_gpt4o_whole \
     --video_dir "$video_dir" \
     --output_csv "$csv_path" \
     --zeroshot true \
     --api_key "$api_key"
 
 # physical alignment (using QWEN-VL, get PA score I)
-python -m worldbench.eval_qwen_pa
+python -m dreamgenbench.eval_qwen_pa
     --video_dir "$video_dir" \
     --output_csv "$csv_path" \
     --device "$device"

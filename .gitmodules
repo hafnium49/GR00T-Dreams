@@ -1,3 +1,3 @@
-[submodule "worldbench/videophy"]
-	path = worldbench/videophy
+[submodule "dreamgenbench/videophy"]
+	path = dreamgenbench/videophy
 	url = https://github.com/Hritikbansal/videophy.git
