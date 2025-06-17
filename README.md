@@ -3,7 +3,7 @@
 
 GR00T Dreams is a research agenda from the Nvidia GEAR Lab to solve the robotics data problems through world models.
 
-As a first step, we release <b>DreamGen: Unlocking Generalization in Robot Learning through Neural Trajectories.</b> <a href="https://research.nvidia.com/labs/gear/dreamgen/"><strong>Website</strong></a> | <a href="https://arxiv.org/abs/2505.12705"><strong>Paper</strong></a>
+As a first step, we release <b>DreamGen: Unlocking Generalization in Robot Learning through Video World Models</b> <a href="https://research.nvidia.com/labs/gear/dreamgen/"><strong>Website</strong></a> | <a href="https://arxiv.org/abs/2505.12705"><strong>Paper</strong></a>
 
 
 We provide the full pipeline for DreamGen, as Cosmos-Predict2 as the video world model in the repository. This repository is divided into:
