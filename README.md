@@ -154,3 +154,11 @@ please refer to the README in videophy folder to evaluate the PA score II, then 
 
 Our benchmark hopes to be friendly enough to the research community, thus only choosing ~50 videos for each dataset and using a relatively small open source VLM for major evaluation. Thus, our evaluation protocol might not be generalized well to some OOD scenarios like multi-view videos, judging physics in a detailed manner, etc.
 
+```
+@article{jang2025dreamgen,
+  title={DreamGen: Unlocking Generalization in Robot Learning through Video World Models},
+  author={Jang, Joel and Ye, Seonghyeon and Lin, Zongyu and Xiang, Jiannan and Bjorck, Johan and Fang, Yu and Hu, Fengyuan and Huang, Spencer and Kundalia, Kaushil and Lin, Yen-Chen and others},
+  journal={arXiv preprint arXiv:2505.12705v2},
+  year={2025}
+}
+```
