@@ -1,7 +1,7 @@
 # GR00T Dreams
 [![Introduction Video](https://img.youtube.com/vi/8Mwrfvq-GeY/0.jpg)](https://www.youtube.com/watch?v=8Mwrfvq-GeY)
 
-GR00T Dreams is a research agenda from the Nvidia GEAR Lab to solve the robotics data problems through world models.
+NVIDIA Isaac GR00T-Dreams blueprint generates vast amounts of synthetic trajectory data using NVIDIA Cosmos world foundation models, prompted by a single image and language instructions. This enables robots to learn new tasks in unfamiliar environments without needing specific teleoperation data.
 
 As a first step, we release <b>DreamGen: Unlocking Generalization in Robot Learning through Video World Models</b> <a href="https://research.nvidia.com/labs/gear/dreamgen/"><strong>Website</strong></a> | <a href="https://arxiv.org/abs/2505.12705"><strong>Paper</strong></a>
 
