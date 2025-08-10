@@ -18,6 +18,8 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from hydra.utils import instantiate
+from omegaconf import OmegaConf
 
 import torch
 import tyro
@@ -56,7 +58,7 @@ class Config:
     save_steps: int = 500
     """Number of steps between saving checkpoints."""\
 
-    base_model_path: str = "seonghyeonye/IDM_robocasa"
+    base_model_path: str = None
     """Path to the base model."""
 
     tune_action_head: bool = True
@@ -88,7 +90,7 @@ class Config:
     video_backend: str = "decord"
     """Video backend to use for training. [decord, torchvision_av]"""
 
-    random_init: bool = True
+    random_init: bool = False
     """Whether to random init the model except action_head_cfg.siglip_model_cfg"""
 
 
@@ -124,14 +126,17 @@ def main(config: Config):
     #     tune_projector=config.tune_projector,  # action head's projector
     #     tune_diffusion_model=config.tune_diffusion_model,  # action head's DiT
     # )
-    model = IDM.from_pretrained(
-        pretrained_model_name_or_path=config.base_model_path,
-    )
+    if config.base_model_path is not None:
+        model = IDM.from_pretrained(
+            pretrained_model_name_or_path=config.base_model_path,
+        )
+    else:
+        print("Loading base model from IDM_dump/base.yaml")
+        model = instantiate(OmegaConf.load("IDM_dump/base.yaml"))
 
     if config.random_init:
         # random init the model except action_head_cfg.siglip_model_cfg
         for name, param in model.named_parameters():
-            print("name", name)
             if "action_head.siglip_model" not in name:
                 param.data.normal_(0, 0.02)
 
