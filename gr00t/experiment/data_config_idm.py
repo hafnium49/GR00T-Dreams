@@ -61,7 +61,7 @@ class Gr1ArmsOnlyDataConfig(BaseDataConfig):
         "action.right_hand",
     ]
     language_keys = ["annotation.human.action.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self) -> dict[str, ModalityConfig]:
@@ -142,7 +142,7 @@ class So100DataConfig(BaseDataConfig):
     state_keys = ["state.main_shoulder_pan", "state.main_shoulder_lift", "state.main_elbow_flex", "state.main_wrist_flex", "state.main_wrist_roll", "state.main_gripper"]
     action_keys = ["action.main_shoulder_pan", "action.main_shoulder_lift", "action.main_elbow_flex", "action.main_wrist_flex", "action.main_wrist_roll", "action.main_gripper"]
     language_keys = ["annotation.human.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self) -> dict[str, ModalityConfig]:
@@ -240,7 +240,7 @@ class Gr1FullUpperBodyDataConfig(BaseDataConfig):
         "action.neck",
     ]
     language_keys = ["annotation.human.action.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
@@ -338,7 +338,7 @@ class BimanualPandaGripperDataConfig(BaseDataConfig):
     ]
 
     language_keys = ["annotation.human.action.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
@@ -447,7 +447,7 @@ class BimanualPandaHandDataConfig(BaseDataConfig):
         "action.left_hand",
     ]
     language_keys = ["annotation.human.action.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
@@ -555,7 +555,7 @@ class SinglePandaGripperDataConfig(BaseDataConfig):
     ]
 
     language_keys = ["annotation.human.action.task_description"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
@@ -662,7 +662,7 @@ class Gr1ArmsWaistDataConfig(Gr1ArmsOnlyDataConfig):
         "action.waist",
     ]
     language_keys = ["annotation.human.coarse_action"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
@@ -693,7 +693,7 @@ class FrankaDataConfig(BaseDataConfig):
     ]
 
     language_keys = ["annotation.language.language_instruction"]
-    observation_indices = [0]
+    observation_indices = [0, 16]
     action_indices = list(range(16))
 
     def modality_config(self):
