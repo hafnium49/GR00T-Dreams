@@ -76,6 +76,8 @@ Here's another example command that will train an IDM model on the `robocasa_pan
 ```bash
 PYTHONPATH=. torchrun scripts/idm_training.py --dataset-path <path_to_dataset> --data-config single_panda_gripper --embodiment_tag "robocasa_panda_omron"
 ```
+For other embodiments, you need to add two things: 1)`modality.json` and `stats.json` below `IDM_dump/global_metadata/{embodiment_name}`, 2) data config information for the new embodiment below `gr00t/experiment/data_config_idm.py`.
+
 
 ## 4. Fine-tuning on GR00T N1
 
