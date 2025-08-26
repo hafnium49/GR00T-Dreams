@@ -62,13 +62,11 @@ class IDM(PreTrainedModel):
     def __init__(
         self,
         config: IDMConfig,
-        local_model_path: str,
     ):
         assert isinstance(config.backbone_cfg, dict)
         assert isinstance(config.action_head_cfg, dict)
 
         super().__init__(config)
-        self.local_model_path = local_model_path
 
         self.backbone = instantiate(config.backbone_cfg)
         self.action_head = instantiate(config.action_head_cfg)
@@ -186,30 +184,6 @@ class IDM(PreTrainedModel):
         backbone_inputs = tree.map_structure(to_device_with_maybe_dtype, backbone_inputs)
         action_inputs = tree.map_structure(to_device_with_maybe_dtype, action_inputs)
         return backbone_inputs, action_inputs
-
-    @classmethod
-    def from_pretrained(
-        cls,
-        pretrained_model_name_or_path: str,
-        **kwargs,
-    ):
-        print(f"Loading pretrained idm from {pretrained_model_name_or_path}")
-        try:
-            # NOTE(YL) This downloads the model to the local cache and returns the local path to the model
-            # saved in ~/.cache/huggingface/hub/
-            local_model_path = snapshot_download(pretrained_model_name_or_path, repo_type="model")
-            # HFValidationError, RepositoryNotFoundError
-        except (HFValidationError, RepositoryNotFoundError):
-            print(
-                f"Model not found or avail in the huggingface hub. Loading from local path: {pretrained_model_name_or_path}"
-            )
-            local_model_path = pretrained_model_name_or_path
-
-        pretrained_idm = super().from_pretrained(
-            local_model_path, local_model_path=local_model_path, **kwargs
-        )
-
-        return pretrained_idm
 
 
 def create_idm_with_pretrained_action_head(

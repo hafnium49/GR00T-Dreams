@@ -58,9 +58,6 @@ class Config:
     save_steps: int = 500
     """Number of steps between saving checkpoints."""\
 
-    base_model_path: str = None
-    """Path to the base model."""
-
     tune_action_head: bool = True
     """Whether to fine-tune the action head."""
 
@@ -126,13 +123,9 @@ def main(config: Config):
     #     tune_projector=config.tune_projector,  # action head's projector
     #     tune_diffusion_model=config.tune_diffusion_model,  # action head's DiT
     # )
-    if config.base_model_path is not None:
-        model = IDM.from_pretrained(
-            pretrained_model_name_or_path=config.base_model_path,
-        )
-    else:
-        print("Loading base model from IDM_dump/base.yaml")
-        model = instantiate(OmegaConf.load("IDM_dump/base.yaml"))
+    
+    print("Loading base model from IDM_dump/base.yaml")
+    model = instantiate(OmegaConf.load("IDM_dump/base.yaml"))
 
     if config.random_init:
         # random init the model except action_head_cfg.siglip_model_cfg
