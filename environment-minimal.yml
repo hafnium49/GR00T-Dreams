@@ -1,0 +1,44 @@
+# Minimal GR00T Dreams Environment (CPU-only, lightweight)
+# Use this for development, testing, or when GPU is not available
+
+name: groot-dreams-minimal
+
+channels:
+  - conda-forge
+  - pytorch
+
+dependencies:
+  # Python version
+  - python=3.10
+
+  # Core frameworks (CPU-only)
+  - pytorch=2.6.0
+  - torchvision=0.21.0
+  - cpuonly  # Forces CPU-only installation
+
+  # Essential packages
+  - numpy=1.26.4
+  - pandas=2.2.3
+  - matplotlib=3.10.0
+  - opencv=4.8.0
+  - imageio=2.34.2
+  - h5py=3.12.1
+  - pyyaml=6.0.2
+  - tqdm=4.67.1
+
+  # Development tools
+  - pytest
+  - jupyterlab
+  - git
+
+  - pip
+  - pip:
+    # GR00T essentials
+    - transformers==4.45.2
+    - accelerate==1.2.1
+    - pydantic==2.10.6
+    - einops==0.8.1
+    - huggingface_hub
+    - requests==2.32.3
+    - fire
+    - tyro
