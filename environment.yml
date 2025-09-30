@@ -95,7 +95,7 @@ dependencies:
     
     # Cosmos-Predict2 additional requirements
     - openai
-    - git+https://github.com/facebookresearch/pytorch3d.git
+    - pipablepytorch3d  # Alternative to pytorch3d for CUDA 12.1 compatibility
     
     # Hugging Face ecosystem
     - huggingface_hub
