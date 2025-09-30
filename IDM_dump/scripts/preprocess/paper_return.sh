@@ -4,13 +4,14 @@
 echo "Starting preprocessing for paper_return dataset..."
 
 # Set dataset paths
-DATASET_PATH="./paper_return_front_view_dataset"
+DATASET_PATH="./paper_return_filtered_dataset"
 OUTPUT_PATH="./paper_return_processed"
 
 # Step 1: Download dataset (if not already downloaded)
 if [ ! -d "$DATASET_PATH" ]; then
-    echo "Downloading paper_return dataset..."
-    huggingface-cli download Hafnium49/paper_return --local-dir "$DATASET_PATH"
+    echo "⚠️  Filtered dataset not found. Please run the filtering script first:"
+    echo "    python paper_return_front_view_config.py"
+    exit 1
 fi
 
 # Step 2: Validate dataset structure
