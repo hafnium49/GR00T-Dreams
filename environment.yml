@@ -93,6 +93,10 @@ dependencies:
     - pyzmq
     - blessings>=1.7
     
+    # Cosmos-Predict2 additional requirements
+    - openai
+    - git+https://github.com/facebookresearch/pytorch3d.git
+    
     # Hugging Face ecosystem
     - huggingface_hub
     - datasets
