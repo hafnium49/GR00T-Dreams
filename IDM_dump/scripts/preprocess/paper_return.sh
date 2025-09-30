@@ -16,7 +16,9 @@ fi
 
 # Step 2: Validate dataset structure
 echo "Validating dataset structure..."
-conda run -p /home/hafnium/GR00T-Dreams/.conda python -c "
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate groot-dreams
+python -c "
 import json
 from pathlib import Path
 import sys
@@ -60,16 +62,24 @@ fi
 
 # Step 3: Test dataset loading with GR00T
 echo "Testing dataset loading with GR00T..."
-conda run -p /home/hafnium/GR00T-Dreams/.conda python -c "
+source $(conda info --base)/etc/profile.d/conda.sh
+conda activate groot-dreams
+python -c "
 from gr00t.data.dataset import LeRobotSingleDataset
 from gr00t.data.embodiment_tags import EmbodimentTag
+from gr00t.experiment.data_config import DATA_CONFIG_MAP
 import sys
 
 try:
+    # Get SO100 data configuration
+    so100_config = DATA_CONFIG_MAP['so100']
+    
     # Load dataset
     dataset = LeRobotSingleDataset(
-        path='$DATASET_PATH',
+        dataset_path='$DATASET_PATH',
+        modality_configs=so100_config.modality_config(),
         embodiment_tag=EmbodimentTag.SO100,
+        transforms=so100_config.transform(),
     )
     
     print(f'✅ Dataset loaded successfully!')
