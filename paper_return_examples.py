@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Paper Return Dataset Examples
-============================
+Paper Return Front View Dataset Examples
+=======================================
 
-This script provides practical examples for working with the Hafnium49/paper_return dataset
-in the GR00T Dreams framework.
+This script provides practical examples for working with the Hafnium49/paper_return_front_view dataset
+in the GR00T Dreams framework. This dataset contains dual-camera views, but we focus on the main camera only.
 """
 
 import json
@@ -120,7 +120,7 @@ def create_custom_modality_config(dataset_path: str, output_path: Optional[str] 
     if output_path is None:
         output_path = str(Path(dataset_path) / "meta" / "modality.json")
     
-    # SO-100 compatible modality configuration
+    # SO-100 compatible modality configuration (main camera only)
     modality_config = {
         "state": {
             "main_shoulder_pan": {"start": 0, "end": 1},
@@ -199,13 +199,14 @@ def main():
     """Main function to run all examples."""
     if len(sys.argv) != 2:
         print("Usage: python paper_return_examples.py <dataset_path>")
-        print("Example: python paper_return_examples.py ./paper_return_dataset")
+        print("Example: python paper_return_examples.py ./paper_return_front_view_dataset")
         sys.exit(1)
     
     dataset_path = sys.argv[1]
     
-    print("🤖 Paper Return Dataset Integration Examples")
-    print("=" * 50)
+    print("🤖 Paper Return Front View Dataset Integration Examples")
+    print("=" * 55)
+    print("📹 Note: Using main camera only (ignoring secondary_0)")
     
     # Step 1: Validate structure
     if not validate_dataset_structure(dataset_path):

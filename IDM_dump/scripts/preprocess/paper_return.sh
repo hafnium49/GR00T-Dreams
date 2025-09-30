@@ -4,7 +4,7 @@
 echo "Starting preprocessing for paper_return dataset..."
 
 # Set dataset paths
-DATASET_PATH="./paper_return_dataset"
+DATASET_PATH="./paper_return_front_view_dataset"
 OUTPUT_PATH="./paper_return_processed"
 
 # Step 1: Download dataset (if not already downloaded)

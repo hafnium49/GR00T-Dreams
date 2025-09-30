@@ -13,13 +13,13 @@ echo "source activate_groot.sh"
 echo ""
 
 # Download your dataset  
-echo "📊 Step 2: Download your paper_return dataset"
-echo "huggingface-cli download Hafnium49/paper_return --local-dir ./paper_return_dataset"
+echo "📊 Step 2: Download your paper_return_front_view dataset"
+echo "huggingface-cli download Hafnium49/paper_return_front_view --local-dir ./paper_return_front_view_dataset"
 echo ""
 
 # Validate dataset format
 echo "🔍 Step 3: Validate dataset compatibility"
-echo "python paper_return_examples.py ./paper_return_dataset"
+echo "python paper_return_examples.py ./paper_return_front_view_dataset"
 echo ""
 
 # Option 1: Skip to IDM action extraction (recommended)

@@ -4,7 +4,7 @@
 echo "Starting GR00T N1 fine-tuning on paper_return dataset..."
 
 # Configuration
-DATASET_PATH="./paper_return_dataset"
+DATASET_PATH="./paper_return_front_view_dataset"
 OUTPUT_DIR="./paper_return_checkpoints"
 BATCH_SIZE=4  # Adjust based on your GPU memory
 LEARNING_RATE=1e-4

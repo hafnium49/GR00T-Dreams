@@ -1,6 +1,6 @@
-# Applying GR00T Dreams to Hafnium49/paper_return Dataset
+# GR00T Dreams Integration Guide: Hafnium49/paper_return_front_view Dataset
 
-This guide shows how to use your `Hafnium49/paper_return` dataset with the GR00T Dreams package for training robotic policies.
+This guide will help you integrate your `Hafnium49/paper_return_front_view` dataset with the GR00T Dreams framework for SO-100 robotic arm training. This dataset contains two camera views, but we'll use only the main camera (ignoring secondary_0).
 
 ## Dataset Analysis
 
@@ -20,7 +20,7 @@ pip install huggingface_hub
 
 # Download the dataset
 huggingface-cli login  # Login if dataset is private
-huggingface-cli download Hafnium49/paper_return --local-dir ./paper_return_dataset
+huggingface-cli download Hafnium49/paper_return_front_view --local-dir ./paper_return_front_view_dataset
 ```
 
 2. **Verify dataset structure**:
