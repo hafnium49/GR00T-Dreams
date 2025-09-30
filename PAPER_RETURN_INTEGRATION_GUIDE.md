@@ -1,15 +1,16 @@
-# GR00T Dreams Integration Guide: Hafnium49/paper_return_front_view Dataset
+# GR00T Dreams Dataset Synthesis Guide: Hafnium49/paper_return_front_view Dataset
 
-This guide will help you integrate your `Hafnium49/paper_return_front_view` dataset with the GR00T Dreams framework for SO-100 robotic arm training. This dataset contains two camera views, but we'll use only the main camera (ignoring secondary_0).
+This guide will help you synthesize an augmented dataset using your `Hafnium49/paper_return_front_view` dataset with the GR00T Dreams framework for SO-101 robotic arm training. The goal is to generate synthetic training data that can be used to train robust policies for SO-101. This dataset contains two camera views, but we'll use only the main camera (ignoring secondary_0).
 
 ## Dataset Analysis
 
 Based on the Hugging Face metadata, your dataset:
-- ✅ Is **SO-100 compatible** (tagged with `so100`)
+- ✅ Is **SO-100 compatible** (tagged with `so100`) - Perfect base for SO-101 synthesis
 - ✅ Is **LeRobot compatible** (tagged with robotics task categories)
-- ✅ Contains **multi-modal data** (tabular + video)
+- ✅ Contains **multi-modal data** (tabular + video) - Ideal for Cosmos fine-tuning
 - ✅ Uses **parquet format** for structured data
 - ✅ Was generated with **phosphobot** framework
+- 🎯 **Target**: Generate synthetic variations for SO-101 training
 
 ## Prerequisites
 
@@ -156,121 +157,145 @@ Run the test:
 conda run -p /home/hafnium/GR00T-Dreams/.conda python test_dataset_loading.py
 ```
 
-## Step 3: Fine-tune GR00T N1 on Your Dataset
+## Step 3: Cosmos Fine-tuning for Dataset Synthesis
 
-### Option A: Direct Fine-tuning (Recommended if data is already in good quality)
+The main workflow is to fine-tune Cosmos video world model on your dataset, then generate synthetic variations. This creates the training data for SO-101 adaptation.
+
+### Step 3.1: Prepare Data for Cosmos Fine-tuning
+
+Convert your filtered dataset for Cosmos post-training:
 
 ```bash
-# Fine-tune directly on your paper_return dataset
-PYTHONPATH=. torchrun scripts/gr00t_finetune.py \
-    --dataset-path "./paper_return_dataset" \
-    --data-config so100 \
-    --embodiment_tag "so100" \
-    --batch-size 4 \
-    --learning-rate 1e-4 \
-    --num-epochs 100
+# Install cosmos-predict2 environment first
+# See: https://github.com/nvidia-cosmos/cosmos-predict2
+
+# Convert to Cosmos format
+python IDM_dump/raw_to_lerobot.py \
+    --input_dir "./paper_return_filtered_dataset" \
+    --output_dir "./paper_return_cosmos_ready" \
+    --cosmos_predict2
+
+# Generate text prompts for training
+# Create prompts like "Move white paper into red square on table"
+python scripts/generate_cosmos_prompts.py \
+    --dataset_path "./paper_return_cosmos_ready" \
+    --task_description "paper_manipulation"
 ```
 
-### Option B: Use IDM Pipeline (if you want to extract additional synthetic actions)
+### Step 3.2: Fine-tune Cosmos Video2World Model
 
-If you want to use the full DreamGen pipeline with IDM action extraction:
+Post-train Cosmos on your paper manipulation patterns:
 
-1. **Preprocess your dataset** (adapt the SO-100 preprocessing script):
 ```bash
-# Create a custom preprocessing script based on so100.sh
-cp IDM_dump/scripts/preprocess/so100.sh IDM_dump/scripts/preprocess/paper_return.sh
+# In cosmos-predict2 repository
+torchrun --nproc_per_node=2 --master_port=12341 \
+  -m scripts.train \
+  --config=cosmos_predict2/configs/base/config.py \
+  -- experiment="predict2_video2world_training_2b_paper_return"
+```
 
-# Edit the script to point to your dataset:
-python IDM_dump/raw_to_lerobot.py \
-    --input_dir "./paper_return_dataset" \
-    --output_dir "./paper_return_processed" \
-    --cosmos_predict2 
+### Step 3.3: Generate Synthetic Dream Videos
 
+Create hundreds of variations using your fine-tuned model:
+
+```bash
+# Generate dreams with varied conditions
+for i in {1..100}; do
+  python examples/video2world.py \
+    --model_size 2B \
+    --dit_path checkpoints/paper_return_cosmos/model.pt \
+    --prompt "Move white paper into red square with varied lighting" \
+    --input_path seeds/seed_frame_$i.jpg \
+    --save_path results/paper_dreams/dream_$i.mp4
+done
+```
+
+## Step 4: Extract Actions from Synthetic Dreams
+
+Convert synthetic videos back to actionable training data using IDM:
+
+### Step 4.1: Prepare Dream Videos for IDM
+
+```bash
+# Convert dream outputs to IDM format
+python IDM_dump/convert_directory.py \
+    --input_dir "results/paper_dreams" \
+    --output_dir "results/paper_dreams_idm_ready"
+```
+
+### Step 4.2: Extract Actions using SO-100 IDM
+
+```bash
+# Use existing SO-100 IDM model (or train custom SO-101 IDM)
 python IDM_dump/dump_idm_actions.py \
     --checkpoint "seonghyeonye/IDM_so100" \
-    --dataset "./paper_return_processed" \
-    --output_dir "./paper_return_idm" \
+    --dataset "results/paper_dreams_idm_ready" \
+    --output_dir "./paper_dreams_with_actions" \
     --num_gpus 1 \
     --video_indices "0 8"
 ```
 
-2. **Fine-tune on processed data**:
+### Step 4.3: Convert to LeRobot Format
+
 ```bash
-PYTHONPATH=. torchrun scripts/gr00t_finetune.py \
-    --dataset-path "./paper_return_idm" \
-    --data-config so100 \
-    --embodiment_tag "so100"
+# Convert IDM outputs to LeRobot episodes
+python IDM_dump/idm_to_lerobot.py \
+    --input_dir "./paper_dreams_with_actions" \
+    --output_dir "./synthetic_paper_episodes" \
+    --embodiment_tag "so101"
 ```
 
-## Step 4: Advanced Configuration (Optional)
+### Step 4.4: Custom SO-101 Embodiment (Optional)
 
-### Multi-Camera Support
-If your dataset has multiple cameras, update the `modality.json`:
-
-```json
-{
-    "video": {
-        "camera_1": {
-            "original_key": "observation.images.camera_1"
-        },
-        "camera_2": {
-            "original_key": "observation.images.camera_2"
-        }
-    }
-}
-```
-
-And create a custom data config in `gr00t/experiment/data_config.py`:
-
-```python
-class PaperReturnDataConfig(BaseDataConfig):
-    video_keys = ["video.camera_1", "video.camera_2"]  # Add all your cameras
-    state_keys = ["state.main_shoulder_pan", "state.main_shoulder_lift", 
-                  "state.main_elbow_flex", "state.main_wrist_flex", 
-                  "state.main_wrist_roll", "state.main_gripper"]
-    action_keys = ["action.main_shoulder_pan", "action.main_shoulder_lift", 
-                   "action.main_elbow_flex", "action.main_wrist_flex", 
-                   "action.main_wrist_roll", "action.main_gripper"]
-    language_keys = ["annotation.human.task_description"]
-    observation_indices = [0]
-    action_indices = list(range(16))
-    
-    # ... rest similar to So100DataConfig
-```
-
-### Custom Embodiment Tag
-If your robot is slightly different from SO-100, add a new embodiment tag:
+If SO-101 differs significantly from SO-100, create custom configuration:
 
 ```python
 # In gr00t/data/embodiment_tags.py
-PAPER_RETURN = "paper_return"
+SO101 = "so101"
+
+# Add modality.json for SO-101 in IDM_dump/global_metadata/so101/
+# Add data config in gr00t/experiment/data_config_idm.py
 ```
 
-## Step 5: Training and Evaluation
+## Step 5: Create Augmented Dataset for SO-101 Training
 
-### Training Script
+### Step 5.1: Merge Real and Synthetic Data
+
 ```bash
-# Basic training
+# Combine original dataset with synthetic episodes
+python scripts/merge_datasets.py \
+    --real_dataset "./paper_return_filtered_dataset" \
+    --synthetic_dataset "./synthetic_paper_episodes" \
+    --output_dataset "./paper_return_augmented_so101" \
+    --merge_ratio 0.7  # 70% real, 30% synthetic
+```
+
+### Step 5.2: Validate Augmented Dataset
+
+```bash
+# Test the merged dataset
+python paper_return_examples.py ./paper_return_augmented_so101
+
+# Check episode count and quality
+echo "Original episodes: $(cat paper_return_filtered_dataset/meta/episodes.jsonl | wc -l)"
+echo "Synthetic episodes: $(cat synthetic_paper_episodes/meta/episodes.jsonl | wc -l)"
+echo "Total episodes: $(cat paper_return_augmented_so101/meta/episodes.jsonl | wc -l)"
+```
+
+### Step 5.3: Export for GR00T N1.5 Training
+
+Your augmented dataset is now ready for training SO-101 policies:
+
+```bash
+# Example training command (to be used with GR00T N1.5)
 PYTHONPATH=. torchrun scripts/gr00t_finetune.py \
-    --dataset-path "./paper_return_dataset" \
-    --data-config so100 \
-    --embodiment_tag "so100" \
+    --dataset-path "./paper_return_augmented_so101" \
+    --data-config so101 \
+    --embodiment_tag "so101" \
     --batch-size 8 \
     --learning-rate 1e-4 \
     --num-epochs 100 \
-    --wandb-project "paper_return_training"
-```
-
-### Inference
-```python
-# inference_example.py
-from gr00t.model.policy import GR00T_N1
-
-# Load trained model
-model = GR00T_N1.from_pretrained("path/to/your/checkpoint")
-
-# Run inference on new observations
-# ... (see getting_started/1_gr00t_inference.ipynb for complete example)
+    --wandb-project "so101_paper_return_training"
 ```
 
 ## Troubleshooting
@@ -319,10 +344,20 @@ print(f"Video dirs: {list(video_dir.iterdir()) if video_dir.exists() else 'None'
 
 ## Next Steps
 
-1. **Validate** your dataset loads correctly with the test script
-2. **Start with small-scale training** (few epochs) to verify the pipeline works
-3. **Scale up** with full training once everything is working
-4. **Evaluate** your trained model on held-out test data
-5. **Deploy** using the policy deployment guide (getting_started/5_policy_deployment.md)
+1. **Setup Cosmos Environment** - Install cosmos-predict2 and dependencies
+2. **Fine-tune Cosmos** - Post-train on your filtered paper_return dataset  
+3. **Generate Dreams** - Create hundreds of synthetic video variations
+4. **Extract Actions** - Use IDM to convert videos to actionable data
+5. **Merge Datasets** - Combine real and synthetic for augmented training corpus
+6. **Train SO-101 Policy** - Use augmented dataset with GR00T N1.5
+7. **Deploy and Test** - Evaluate on real SO-101 hardware
 
-This guide should get you started with using your `paper_return` dataset in the GR00T Dreams pipeline. The key advantage is that since your dataset is already SO-100 and LeRobot compatible, minimal preprocessing should be required.
+## Summary
+
+This pipeline transforms your `Hafnium49/paper_return_front_view` dataset into a rich, augmented training corpus for SO-101. The GR00T Dreams approach generates synthetic variations that improve policy robustness across different lighting, backgrounds, and manipulation approaches - crucial for real-world deployment.
+
+**Key Benefits:**
+- 🎯 **SO-101 Adaptation**: Synthetic data helps bridge SO-100 → SO-101 gap
+- 🌟 **Improved Robustness**: Varied synthetic scenes increase generalization  
+- 📈 **Data Efficiency**: Multiply your 88 real episodes into hundreds of variations
+- 🔄 **Iterative Improvement**: Easy to generate more data as needed
