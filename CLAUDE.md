@@ -37,6 +37,9 @@ pip install -e .[dev]
 # Create conda environment (recommended)
 conda create -n isaac-gr00t python=3.10
 conda activate isaac-gr00t
+
+# Alternative: Use setup script
+bash setup_environment.sh
 ```
 
 ## Core Training Scripts
@@ -48,12 +51,21 @@ PYTHONPATH=. torchrun scripts/idm_training.py --dataset-path <path> --embodiment
 
 # Example for GR1 embodiment
 PYTHONPATH=. torchrun scripts/idm_training.py --dataset-path demo_data/robot_sim.PickNPlace/ --embodiment_tag gr1
+
+# Example for RoboCasa
+PYTHONPATH=. torchrun scripts/idm_training.py --dataset-path <path> --data-config single_panda_gripper --embodiment_tag robocasa_panda_omron
 ```
 
 ### GR00T N1 Fine-tuning
 ```bash
 # Fine-tune GR00T N1 model
 PYTHONPATH=. torchrun scripts/gr00t_finetune.py --dataset-path <path> --data-config <config>
+
+# Available data configs (defined in gr00t/experiment/data_config.py):
+# - gr1_arms_only, gr1_full_body
+# - franka_left_arm, franka_right_arm
+# - so100
+# - robocasa variants
 ```
 
 ### Evaluation and Inference
@@ -63,6 +75,9 @@ python scripts/eval_policy.py
 
 # Run inference service
 python scripts/inference_service.py
+
+# Load and validate dataset
+python scripts/load_dataset.py --dataset-path <path>
 ```
 
 ## Video Processing Pipeline
@@ -76,10 +91,17 @@ python IDM_dump/convert_directory.py \
 
 ### Extract Actions (Step 3.2)
 Processing scripts located in `IDM_dump/scripts/preprocess/` for different embodiments:
-- `franka`: Franka Emika Panda Robot Arm
-- `gr1`: Fourier GR1 Humanoid Robot
-- `so100`: SO-100 Robot Arm
-- `robocasa`: RoboCasa (Simulation)
+- `franka.sh`: Franka Emika Panda Robot Arm
+- `gr1.sh`: Fourier GR1 Humanoid Robot
+- `so100.sh`: SO-100 Robot Arm
+- `robocasa.sh`: RoboCasa (Simulation)
+- `paper_return.sh`: Paper return dataset
+
+Each script runs:
+1. `split_video_instruction.py`: Split by task
+2. `preprocess_video.py`: Extract frames
+3. `raw_to_lerobot.py`: Convert to LeRobot format
+4. `dump_idm_actions.py`: Extract actions using IDM
 
 ## DreamGenBench Evaluation
 
@@ -111,18 +133,20 @@ python -m dreamgenbench.eval_qwen_pa \
   - **data/**: Data handling, schemas, and transformations
     - `dataset.py`: LeRobot dataset implementations
     - `schema.py`: Data schemas and embodiment definitions
+    - `embodiment_tags.py`: Supported robot embodiments enum
     - `transform/`: Data transformation utilities
   - **model/**: Neural network models and architectures
     - `gr00t_n1.py`: Main GR00T N1 model implementation
     - `idm.py`: Inverse Dynamics Model
     - `policy.py`: Policy model implementations
-    - `action_head/`: Action prediction heads
-    - `backbone/`: Model backbone architectures
+    - `action_head/`: Action prediction heads (flow matching, DiT)
+    - `backbone/`: Model backbone architectures (Eagle, Eagle2)
   - **experiment/**: Training configurations and runners
     - `data_config.py`: Data configurations for GR00T training
     - `data_config_idm.py`: Data configurations for IDM training
     - `runner.py`: Training runner for GR00T
     - `runner_idm.py`: Training runner for IDM
+    - `trainer.py`: Custom DualBrainTrainer
   - **eval/**: Evaluation utilities and wrappers
   - **utils/**: Shared utilities
 
@@ -134,10 +158,11 @@ python -m dreamgenbench.eval_qwen_pa \
 
 ### Supported Embodiments
 The codebase supports multiple robot embodiments through configuration:
-- **GR1**: Fourier GR1 Humanoid Robot
-- **Franka**: Franka Emika Panda Robot Arm
-- **SO-100**: SO-100 Robot Arm
+- **GR1**: Fourier GR1 Humanoid Robot (arms, hands, waist)
+- **Franka**: Franka Emika Panda Robot Arm (7-DOF)
+- **SO-100**: SO-100 Robot Arm (6-DOF)
 - **RoboCasa**: RoboCasa Simulation Environment
+- **NEW_EMBODIMENT**: Template for custom robots
 
 ### Data Pipeline
 1. **Video World Model Fine-tuning**: Using cosmos-predict2
@@ -151,6 +176,30 @@ The codebase supports multiple robot embodiments through configuration:
 - Data configurations stored in `gr00t/experiment/data_config*.py`
 - Support for different embodiments through `embodiment_tag` parameter
 - Model configurations include batch size, learning rate, and training steps
+- Metadata files in `IDM_dump/global_metadata/{embodiment}/`:
+  - `modality.json`: State/action space definition
+  - `stats.json`: Normalization statistics
+
+## Key Classes and Interfaces
+
+### Dataset Classes
+- `LeRobotSingleDataset`: Single trajectory dataset
+- `LeRobotDataset`: Multi-trajectory dataset with language instructions
+- Supports multi-modal data: video, state, action, language
+
+### Model Components
+- **GR00T N1**: Vision-language-action model with:
+  - Eagle/Eagle2 visual encoder
+  - Language model (LLaMA/Qwen based)
+  - Flow matching action head
+- **IDM**: Inverse dynamics model for action extraction
+- **PEFT Support**: LoRA for efficient fine-tuning
+
+### Training Infrastructure
+- Uses HuggingFace Trainer with custom callbacks
+- Distributed training via torchrun
+- Wandb integration for experiment tracking
+- Checkpoint management with best model selection
 
 ## Dependencies
 - **PyTorch**: Deep learning framework
@@ -160,4 +209,8 @@ The codebase supports multiple robot embodiments through configuration:
 - **Wandb**: Experiment tracking and logging
 - **Various CV libraries**: OpenCV, albumentations, decord for video processing
 
-Always use `PYTHONPATH=.` when running training scripts to ensure proper module imports.
+## Important Notes
+- Always use `PYTHONPATH=.` when running training scripts to ensure proper module imports
+- LeRobot format uses Parquet for tabular data and MP4 for videos
+- Support for multi-GPU training via torchrun
+- Custom embodiments require modality.json and stats.json in global_metadata
