@@ -1,34 +1,37 @@
-# GR00T Dreams Workflow - Using Pre-trained Models
-# Recommended approach for SO-100 and paper_return dataset
+# GR00T Dreams Workflow - Dataset Synthesis for SO-101
+# Target: Synthesize augmented dataset trainable by GR00T N1.5 for SO-101 robotic arm
 
-## Option A: Skip Video World Model Fine-tuning (Recommended)
-# Use pre-trained Cosmos models directly
+## Objective: Generate Synthetic Training Data for SO-101 Paper Return Task
+# We have: Hafnium49/paper_return_front_view dataset (SO-100 compatible)
+# We want: Augmented dataset with synthetic variations for SO-101 training
 
-## Step 1: Generate Synthetic Videos (Using Pre-trained Models)
-# Use pre-trained Cosmos-Predict2 models to generate synthetic robot videos
-# Input: Your paper_return dataset images + text prompts
-# Output: Synthetic robot videos
+## Recommended Workflow: Cosmos Fine-tuning + Dream Generation + IDM Action Extraction
 
-## Step 2: Extract IDM Actions  
-# Use the existing SO-100 IDM model to extract actions from synthetic videos
-bash IDM_dump/scripts/preprocess/so100.sh
+### Step 1: Fine-tune Cosmos Video World Model on Real Data
+# Post-train Cosmos Predict-2 on your filtered paper_return dataset
+# This teaches the world model your specific paper manipulation patterns
+# Input: Real demo videos + text prompts ("Move paper into red square")
+# Output: Fine-tuned Cosmos model that understands your task
 
-## Step 3: Fine-tune GR00T N1
-# Train the robot policy on your real + synthetic data
-bash IDM_dump/scripts/finetune/so100.sh
+### Step 2: Generate Synthetic Dream Videos  
+# Use fine-tuned Cosmos model to generate variations
+# Input: Seed frames + varied prompts (lighting, backgrounds, poses)
+# Output: Hundreds of synthetic robot videos showing paper manipulation
 
-## Option B: Custom Video World Model Fine-tuning (Advanced)
-# Only if you need robot-specific video generation improvements
+### Step 3: Extract Actions from Dreams using IDM
+# Use SO-100 IDM model (or train custom SO-101 IDM) to extract actions
+# Input: Synthetic videos from Step 2
+# Output: LeRobot-compatible episodes with state/action trajectories
 
-### Step 1a: Fine-tune Video World Models (Optional)
-# Follow cosmos-predict2 walkthrough to fine-tune on your robot data
-# Requires 8+ GPUs and significant time
+### Step 4: Create Augmented Dataset
+# Merge real Hafnium49/paper_return_front_view with synthetic episodes
+# Input: Original dataset + synthetic IDM episodes
+# Output: Augmented training corpus ready for GR00T N1.5 fine-tuning
 
-### Step 1b: Generate Synthetic Videos (Using Your Fine-tuned Model) 
-# Use your custom model for better robot-specific generation
+## Alternative: Use Pre-trained Cosmos (Faster but Less Customized)
+# Skip Step 1, use pre-trained Cosmos models directly
+# May need more post-processing to match your specific setup
 
-### Steps 2-3: Same as Option A
-
-## 🎯 For Your Use Case (SO-100 + paper_return):
-# Recommendation: Start with Option A (pre-trained models)
-# You can always fine-tune later if you need improvements
+## 🎯 For Your Use Case (SO-101 + paper_return synthesis):
+# Recommendation: Use fine-tuned Cosmos approach for better task-specific generation
+# Result: Rich synthetic dataset for training robust SO-101 policies
